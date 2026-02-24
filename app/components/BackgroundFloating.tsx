@@ -25,7 +25,7 @@ const floatVariants = {
     transition: {
       duration: 8,
       repeat: Infinity,
-      ease: "easeInOut",
+      ease: "easeInOut" as const,
     },
   },
 };
@@ -38,7 +38,7 @@ const floatVariantsSlow = {
     transition: {
       duration: 12,
       repeat: Infinity,
-      ease: "easeInOut",
+      ease: "easeInOut" as const,
     },
   },
 };
