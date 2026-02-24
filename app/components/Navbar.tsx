@@ -3,20 +3,29 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
-export default function Navbar() {
+type Props = { onResetView?: () => void };
+
+export default function Navbar({ onResetView }: Props) {
   const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white/98 px-4 py-3 backdrop-blur dark:border-gray-800 dark:bg-[var(--background)]/98 sm:px-6">
-      <h1 className="flex items-baseline gap-2 text-lg font-semibold tracking-wide text-gray-900 dark:text-white">
-        <span>הֲלָכָה</span>
-        <span
-          className="text-[var(--halacha-gold)] underline"
-          style={{ fontFamily: "var(--font-roboto), Roboto, sans-serif" }}
+      <h1 className="m-0">
+        <button
+          type="button"
+          onClick={onResetView}
+          className="cursor-pointer flex items-baseline gap-2 text-lg font-semibold tracking-wide text-gray-900 no-underline opacity-100 transition-opacity hover:opacity-80 dark:text-white"
+          aria-label="Return home and start fresh search"
         >
-          AI
-        </span>
-        <span>HALACHA</span>
+          <span>הֲלָכָה</span>
+          <span
+            className="text-[var(--halacha-gold)] underline"
+            style={{ fontFamily: "var(--font-roboto), Roboto, sans-serif" }}
+          >
+            AI
+          </span>
+          <span>HALACHA</span>
+        </button>
       </h1>
       <button
         type="button"

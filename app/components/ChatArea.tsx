@@ -1,21 +1,82 @@
 "use client";
 
-import { Loader2, Send } from "lucide-react";
-import { useCallback, useState } from "react";
+import { ExternalLink, Loader2, Send, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getHalachicAnswer, type HalachaSource } from "../actions/halacha";
 
-type Message = { role: "user" | "assistant"; content: string };
+const HISTORY_KEY = "halacha-ai-search-history";
 
-const MOCK_ANSWER = `על פי שולחן ערוך (אורח חיים, סימן רע"א), יש לברך על הנר לפני השקיעה. המשנה ברורה מוסיף שיש להדליק בזמן שיכול להנות מהאור.
+type Message =
+  | { role: "user"; content: string }
+  | { role: "assistant"; content: string; sources?: HalachaSource[] }
+  | { role: "assistant"; error: string };
 
-In short: One should recite the blessing over the candles before sunset, and kindle at a time when one can benefit from the light.`;
+function loadHistory(): Message[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Message[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
-export default function ChatArea() {
+function saveHistory(messages: Message[]) {
+  if (typeof window === "undefined") return;
+  try {
+    if (messages.length === 0) {
+      localStorage.removeItem(HISTORY_KEY);
+    } else {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(messages));
+    }
+  } catch {
+    // ignore
+  }
+}
+
+type Props = {
+  onHasContentChange?: (hasContent: boolean) => void;
+  resetViewTrigger?: number;
+};
+
+export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: Props) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+  const skipSaveRef = useRef(false);
+
+  useEffect(() => {
+    setMessages(loadHistory());
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (resetViewTrigger > 0) {
+      skipSaveRef.current = true;
+      setMessages([]);
+    }
+  }, [resetViewTrigger]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (skipSaveRef.current) {
+      skipSaveRef.current = false;
+      return;
+    }
+    saveHistory(messages);
+  }, [messages, hydrated]);
+
+  const hasContent = messages.length > 0 || loading;
+
+  useEffect(() => {
+    onHasContentChange?.(hasContent);
+  }, [hasContent, onHasContentChange]);
 
   const handleSearch = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       const trimmed = input.trim();
       if (!trimmed || loading) return;
@@ -24,48 +85,106 @@ export default function ChatArea() {
       setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
       setLoading(true);
 
-      setTimeout(() => {
-        setMessages((prev) => [...prev, { role: "assistant", content: MOCK_ANSWER }]);
-        setLoading(false);
-      }, 2000);
+      const result = await getHalachicAnswer(trimmed);
+
+      if (result.ok) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: result.answer, sources: result.sources },
+        ]);
+      } else {
+        setMessages((prev) => [...prev, { role: "assistant", error: result.error }]);
+      }
+      setLoading(false);
     },
     [input, loading]
   );
 
-  const hasContent = messages.length > 0 || loading;
+  const handleClearHistory = useCallback(() => {
+    localStorage.removeItem(HISTORY_KEY);
+    setMessages([]);
+    onHasContentChange?.(false);
+  }, [onHasContentChange]);
 
   return (
-    <main className="flex w-full max-w-4xl flex-1 flex-col bg-transparent">
+    <main className="flex w-full max-w-4xl flex-1 min-h-0 flex-col bg-transparent transition-[flex] duration-300 ease-out">
       {hasContent && (
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex w-full ${msg.role === "user" ? "justify-start" : "justify-end"}`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-[var(--halacha-gold)]/15 text-[var(--foreground)] dark:bg-[var(--halacha-gold)]/20 dark:text-white"
-                      : "bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-100"
-                  }`}
-                  dir={msg.role === "user" ? "rtl" : "auto"}
-                >
-                  {msg.content}
-                </div>
-              </div>
-            ))}
-            {loading && (
-              <div className="flex w-full justify-end">
-                <div className="flex items-center gap-2 rounded-2xl bg-gray-100 px-4 py-3 dark:bg-slate-800">
-                  <Loader2 className="h-4 w-4 animate-spin text-[var(--halacha-gold)]" aria-hidden />
-                  <span className="text-sm text-gray-600 dark:text-gray-300">מחפש במקורות...</span>
-                </div>
-              </div>
-            )}
+        <>
+          <div className="shrink-0 flex justify-center px-4 pt-2 pb-1">
+            <button
+              type="button"
+              onClick={handleClearHistory}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+              aria-label="Clear history"
+            >
+              <Trash2 className="h-4 w-4" aria-hidden />
+              <span dir="rtl" lang="he">
+                נקה היסטוריה
+              </span>
+            </button>
           </div>
-        </div>
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2 pb-4">
+            <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`flex w-full ${msg.role === "user" ? "justify-start" : "justify-end"}`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
+                      msg.role === "user"
+                        ? "bg-[var(--halacha-gold)]/15 text-[var(--foreground)] dark:bg-[var(--halacha-gold)]/20 dark:text-white"
+                        : "bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-100"
+                    }`}
+                    dir={msg.role === "user" ? "rtl" : "auto"}
+                  >
+                    {"error" in msg ? (
+                      <p className="text-red-600 dark:text-red-400">{msg.error}</p>
+                    ) : (
+                      <>
+                        <div className="whitespace-pre-wrap">{msg.content}</div>
+                        {msg.sources && msg.sources.length > 0 && (
+                          <div className="mt-4 border-t border-gray-200 dark:border-gray-600 pt-3">
+                            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                              מקורות
+                            </p>
+                            <ul className="flex flex-wrap gap-2">
+                              {msg.sources.map((s, j) => (
+                                <li key={j}>
+                                  <a
+                                    href={s.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 rounded-md bg-[var(--halacha-gold)]/20 px-2 py-1 text-sm text-[var(--halacha-gold-muted)] hover:bg-[var(--halacha-gold)]/30 dark:bg-[var(--halacha-gold)]/25 dark:text-[var(--halacha-gold-light)] dark:hover:bg-[var(--halacha-gold)]/35"
+                                  >
+                                    <span className="font-medium">{s.siteName ?? "Source"}:</span>
+                                    <span className="truncate max-w-[160px]" title={s.title}>
+                                      {s.title}
+                                    </span>
+                                    <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {loading && (
+                <div className="flex w-full justify-end">
+                  <div className="flex items-center gap-2 rounded-2xl bg-gray-100 px-4 py-3 dark:bg-slate-800">
+                    <Loader2 className="h-4 w-4 animate-spin text-[var(--halacha-gold)]" aria-hidden />
+                    <span className="text-sm text-gray-600 dark:text-gray-300">מחפש במקורות...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
 
       <div className="shrink-0 flex w-full justify-center px-4 pb-8 pt-2">
