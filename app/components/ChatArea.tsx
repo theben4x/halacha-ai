@@ -6,6 +6,9 @@ import { getHalachicAnswer, type HalachaSource } from "../actions/halacha";
 
 const HISTORY_KEY = "halacha-ai-search-history";
 
+const PLACEHOLDER_SHORT = "שאל שאלה...";
+const PLACEHOLDER_FULL = "שאל שאלה על ההלכה או כל דבר הקשור ליהדות...";
+
 type Message =
   | { role: "user"; content: string }
   | { role: "assistant"; content: string; sources?: HalachaSource[] }
@@ -47,6 +50,15 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
   const [loading, setLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const skipSaveRef = useRef(false);
+  const [placeholder, setPlaceholder] = useState(PLACEHOLDER_SHORT);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const update = () => setPlaceholder(mq.matches ? PLACEHOLDER_FULL : PLACEHOLDER_SHORT);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     setMessages(loadHistory());
@@ -197,10 +209,11 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="שאל שאלה על ההלכה או כל דבר הקשור ליהדות..."
+            placeholder={placeholder}
             dir="rtl"
             disabled={loading}
-            className="min-h-[44px] min-w-0 flex-1 rounded-full border-0 bg-transparent px-5 py-2.5 text-[15px] text-[var(--foreground)] placeholder:text-gray-400 focus:outline-none focus:ring-0 disabled:opacity-70 dark:bg-transparent dark:text-white dark:placeholder:text-gray-500"
+            className="min-h-[44px] min-w-0 flex-1 rounded-full border-0 bg-transparent px-5 py-2.5 text-[var(--foreground)] placeholder:text-gray-400 focus:outline-none focus:ring-0 disabled:opacity-70 dark:bg-transparent dark:text-white dark:placeholder:text-gray-500"
+            style={{ fontSize: "16px" }}
             aria-label="Question input"
           />
           <button
