@@ -22,19 +22,21 @@ Halacha.ai is an **AI-powered search engine** that aggregates trusted Halachic s
 
 End-to-end flow:
 
-```
-User Query (Hebrew)
-       ↓
-Next.js App (Server Action)
-       ↓
-Tavily Search (domain-restricted: Sefaria, HebrewBooks, etc.)
-       ↓
-OpenAI GPT-4o-mini (analysis + synthesis)
-       ↓
-Structured Response (answer + sources + מסקנה להלכה)
+```mermaid
+flowchart LR
+  A[User] --> B[Next.js]
+  B --> C[Tavily]
+  C --> D[OpenAI]
+  D --> E[Structured Response]
 ```
 
-*You can add a diagram here.*
+| Step | Description |
+|------|-------------|
+| **User** | Submits a Halachic question in Hebrew. |
+| **Next.js** | App (Server Action) receives the query. |
+| **Tavily** | Domain-restricted search (Sefaria, HebrewBooks, Yeshiva.org.il, etc.). |
+| **OpenAI** | GPT-4o-mini analyzes results and synthesizes an answer with מסקנה להלכה. |
+| **Structured Response** | Answer + source links returned to the user. |
 
 ---
 
@@ -53,11 +55,11 @@ Structured Response (answer + sources + מסקנה להלכה)
 
 ## ⚙️ Installation
 
-### 1. Clone and install
+### 1. Install dependencies
+
+From the project root:
 
 ```bash
-git clone <your-repo-url>
-cd halacha-ai
 npm install
 ```
 
