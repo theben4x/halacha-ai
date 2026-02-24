@@ -36,7 +36,6 @@ export default function ChatArea() {
 
   return (
     <main className="flex w-full max-w-4xl flex-1 flex-col bg-transparent">
-      {/* Chat history above the search bar when there are messages */}
       {hasContent && (
         <div className="flex-1 overflow-y-auto px-4 py-4">
           <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
@@ -69,7 +68,6 @@ export default function ChatArea() {
         </div>
       )}
 
-      {/* Search bar — fixed at bottom of this section */}
       <div className="shrink-0 flex w-full justify-center px-4 pb-8 pt-2">
         <form
           dir="rtl"

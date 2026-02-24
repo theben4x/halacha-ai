@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
-/* Tailwind v4: dark mode via .dark class on html — apply when ancestor has .dark */
+/* Tailwind v4: dark mode via .dark class on html */
 @custom-variant dark (.dark &);
 
-/* Light mode: White background, black/dark blue text */
+/* Light mode: white background, gold/black theme */
 :root {
   --background: #ffffff;
   --foreground: #0c1929;
@@ -18,7 +18,7 @@
   --placeholder: #9ca3af;
 }
 
-/* Dark mode: Deep navy/black background, default text white */
+/* Dark mode: deep navy/black, white text */
 .dark {
   --background: #020617;
   --foreground: #ffffff;
@@ -33,13 +33,11 @@
   --placeholder: #94a3b8;
 }
 
-/* Force body and key text white in dark mode (no hardcoded colors in components) */
 .dark body {
   background: #020617;
   color: #ffffff;
 }
 
-/* Main headline in hero: white in dark */
 .dark section h1 {
   color: #ffffff !important;
 }
@@ -57,7 +55,6 @@ body {
   font-family: var(--font-noto-sans-hebrew), "Noto Sans Hebrew", system-ui, sans-serif;
 }
 
-/* Placeholder: soft gray, looks like hint not real text */
 input::placeholder {
   color: var(--placeholder);
   opacity: 0.9;

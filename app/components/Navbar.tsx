@@ -8,11 +8,10 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white/98 px-4 py-3 backdrop-blur dark:border-gray-800 dark:bg-[var(--background)]/98 sm:px-6">
-      {/* Logo: "HALACHA <u>AI</u> הֲלָכָה" — RTL; no hardcoded colors, Tailwind dark only */}
       <h1 className="flex items-baseline gap-2 text-lg font-semibold tracking-wide text-gray-900 dark:text-white">
         <span>הֲלָכָה</span>
         <span
-          className="underline text-[var(--halacha-gold)]"
+          className="text-[var(--halacha-gold)] underline"
           style={{ fontFamily: "var(--font-roboto), Roboto, sans-serif" }}
         >
           AI

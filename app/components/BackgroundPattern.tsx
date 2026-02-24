@@ -1,8 +1,5 @@
 "use client";
 
-/**
- * Gold lines/grid only - elegant but noticeable.
- */
 export default function BackgroundPattern() {
   return (
     <div
