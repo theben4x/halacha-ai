@@ -144,7 +144,7 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
                     ) : (
                       <>
                         <div className="whitespace-pre-wrap">{msg.content}</div>
-                        {msg.sources && msg.sources.length > 0 && (
+                        {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
                           <div className="mt-4 border-t border-gray-200 dark:border-gray-600 pt-3">
                             <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                               מקורות
