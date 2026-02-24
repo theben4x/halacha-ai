@@ -2,6 +2,8 @@
 
 **AI-powered Halachic search engine** — ask questions in Hebrew and get answers grounded in classic and contemporary Halachic sources.
 
+**[→ Live website](https://halacha-ai-cshe.vercel.app/)**
+
 ---
 
 ## English
