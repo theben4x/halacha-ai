@@ -1,89 +1,115 @@
 # Halacha.ai
 
-**AI-powered Halachic search engine** — ask questions in Hebrew and get answers grounded in classic and contemporary Halachic sources.
+**[→ Live app](https://halacha-ai-cshe.vercel.app/)**
 
-**[→ Live website](https://halacha-ai-cshe.vercel.app/)**
-
----
-
-## English
-
-Halacha.ai is an AI-powered Halachic search engine that helps users find clear, sourced answers to Halachic questions. You ask in Hebrew; the app searches trusted Jewish-law sources and uses OpenAI to synthesize an answer with citations.
-
-**How it works:** Your question is sent to **Tavily** for web search restricted to selected Halachic domains. Results are then passed to **OpenAI** (GPT-4o-mini), which produces a concise Hebrew answer with a "מסקנה להלכה" (Halachic conclusion) and source links.
-
-**Sources searched include:**
-
-- **Sefaria** — Tanakh, Talmud, and Jewish texts
-- **HebrewBooks** — classic seforim and responsa
-- **Torat Emet** — Torah software and texts
-- **Yeshiva.org.il** (אתר ישיבה) — modern Psak and Shiurim
-- **Din.org.il** (אתר דין) — practical Halacha
-- **Moreshet Maran** — Sephardic tradition (Yalkut Yosef, Maran Harav Ovadia Yosef)
-
-The interface is RTL, supports dark mode, and keeps search history in the browser (localStorage). Built with **Next.js** (App Router), **Tailwind CSS**, and the above APIs.
+*תשובות הלכתיות מדויקות מהמקורות — AI-powered Halachic search in Hebrew.*
 
 ---
 
-## עברית
+## 🎯 Problem
 
-Halacha.ai הוא מנוע חיפוש הלכתי מבוסס בינה מלאכותית. המשתמש שואל שאלה בעברית, והמערכת מחפשת במקורות נבחרים ומחזירה תשובה עם ציטוטים ומקורות.
-
-**איך זה עובד:** השאלה נשלחת ל-**Tavily** לחיפוש ברשת מוגבל לאתרי הלכה נבחרים. התוצאות מועברות ל-**OpenAI** (GPT-4o-mini), שמפיק תשובה בעברית עם "מסקנה להלכה" ולינקים למקורות.
-
-**בין המקורות הנכללים בחיפוש:**
-
-- **Sefaria** — תנ"ך, תלמוד וטקסטים יהודיים
-- **HebrewBooks** — ספרים ושאלות ותשובות קלאסיים
-- **Torat Emet** — תוכנות תורה וטקסטים
-- **אתר ישיבה** (Yeshiva.org.il) — פסק Shiurim
-- **אתר דין** (Din.org.il) — הלכה מעשית
-- **Moreshet Maran** — מסורת ספרד (ילקוט יוסף, מרן הרב עובדיה יוסף)
-
-הממשק בעברית (RTL), תומך במצב כהה, ושומר היסטוריית חיפוש בדפדפן (localStorage). הבנייה ב-**Next.js** (App Router), **Tailwind CSS** וה-API הנ"ל.
+Searching for Halachic answers across multiple sources is time-consuming and often yields fragmented results. Users must visit Sefaria, HebrewBooks, Yeshiva.org.il, and other sites separately, then piece together an answer—without a clear conclusion or unified view.
 
 ---
 
-## Setup
+## 💡 Solution
 
-### 1. Install dependencies
+Halacha.ai is an **AI-powered search engine** that aggregates trusted Halachic sources (Sefaria, HebrewBooks, Torat Emet, Yeshiva.org.il, Din.org.il, Moreshet Maran, and more via **Tavily**), then uses **OpenAI** to produce a **single, sourced answer** in Hebrew—with a clear **מסקנה להלכה** (Halachic conclusion) and clickable source links.
+
+---
+
+## 🧠 Architecture
+
+End-to-end flow:
+
+```
+User Query (Hebrew)
+       ↓
+Next.js App (Server Action)
+       ↓
+Tavily Search (domain-restricted: Sefaria, HebrewBooks, etc.)
+       ↓
+OpenAI GPT-4o-mini (analysis + synthesis)
+       ↓
+Structured Response (answer + sources + מסקנה להלכה)
+```
+
+*You can add a diagram here.*
+
+---
+
+## 🛠 Tech Stack
+
+| Layer        | Tech |
+|-------------|------|
+| **Framework** | Next.js 15 (App Router) |
+| **Styling**   | Tailwind CSS |
+| **Motion**    | Framer Motion |
+| **Search**    | Tavily API |
+| **LLM**       | OpenAI (GPT-4o-mini) |
+| **Icons**     | Lucide React |
+
+---
+
+## ⚙️ Installation
+
+### 1. Clone and install
 
 ```bash
+git clone <your-repo-url>
+cd halacha-ai
 npm install
 ```
 
 ### 2. Environment variables
 
-Create a `.env.local` file in the project root with your API keys:
+Create a `.env.local` file in the project root:
 
 ```env
 TAVILY_API_KEY=your_tavily_api_key
 OPENAI_API_KEY=your_openai_api_key
 ```
 
-- **TAVILY_API_KEY** — Get a key at [tavily.com](https://tavily.com) for the search API.
-- **OPENAI_API_KEY** — Get a key from [OpenAI](https://platform.openai.com/api-keys) for the language model.
+- **TAVILY_API_KEY** — [Tavily](https://tavily.com) (search API).
+- **OPENAI_API_KEY** — [OpenAI API keys](https://platform.openai.com/api-keys).
 
-### 3. Run the app
+### 3. Run locally
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## Tech stack
+## 🚀 Usage
 
-- **Next.js 16** (App Router)
-- **React 19**
-- **Tailwind CSS 4**
-- **Tavily** — domain-restricted web search
-- **OpenAI** — GPT-4o-mini for answer generation
+1. **Ask in Hebrew** — Type your Halachic question in the search bar (e.g. blessings, Shabbat, kashrut, tefillah).
+2. **Get one answer** — The app searches the configured sources and returns a single, readable answer with a Halachic conclusion.
+3. **Use the sources** — Click any source link to open the original text (Sefaria, HebrewBooks, etc.).
+4. **History** — Your session history is stored in the browser (localStorage). Use **נקה היסטוריה** to clear it, or click the logo to reset the view and start a fresh search without deleting history.
+5. **Dark mode** — Toggle via the sun/moon icon in the header.
 
 ---
 
-*Disclaimer: Answers are generated by AI and based on online sources. They are not a substitute for a Posek; when in doubt, consult a qualified rabbi.*
+## 📊 Example
+
+**Query (English):** *What is the blessing for Bamba?*
+
+**Query (Hebrew):** *מה הברכה על במבה?*
+
+The app returns a concise answer with:
+
+- The correct blessing (**בורא מיני מזונות** for Bamba-style snacks).
+- Short explanation and context.
+- **מסקנה להלכה** — a one- or two-sentence conclusion.
+- **מקורות** — links to Sefaria, HebrewBooks, or other configured sources.
+
+---
+
+## 📜 Disclaimer
+
+Answers are generated by AI and based on online sources. They are not a substitute for a Posek; when in doubt, consult a qualified rabbi.
 
 *התשובות מופקות על ידי בינה מלאכותית ומתבססות על מקורות מקוונים. אין להסתמך עליהן כפסק הלכה סופי; בכל ספק יש להתייעץ עם רב מורה הוראה.*
