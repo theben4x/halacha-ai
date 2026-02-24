@@ -18,24 +18,48 @@ Halacha.ai is an **AI-powered search engine** that aggregates trusted Halachic s
 
 ---
 
+## ✨ Key Features
+
+### 📚 Knowledge Base
+
+Tavily searches are restricted to the following Halachic sources:
+
+- **Sefaria** — Tanakh, Talmud, and Jewish texts
+- **HebrewBooks** — Classic seforim and responsa
+- **Torat Emet** — Torah software and texts
+- **Yeshiva.org.il** (אתר ישיבה) — Modern Psak and Shiurim
+- **Din.org.il** (אתר דין) — Practical Halacha
+- **Moreshet Maran** — Sephardic tradition (Yalkut Yosef, Maran Harav Ovadia Yosef)
+
+---
+
 ## 🧠 Architecture
 
 End-to-end flow:
 
 ```mermaid
-flowchart LR
+flowchart TB
   A[User] --> B[Next.js]
-  B --> C[Tavily]
-  C --> D[OpenAI]
-  D --> E[Structured Response]
+  B --> T[Tavily Search]
+  subgraph sources["Halachic sources"]
+    S1[Sefaria]
+    S2[HebrewBooks]
+    S3[Din.org.il]
+    S4[Yeshiva.org.il]
+  end
+  T --> sources
+  sources --> C[Context]
+  C --> O[OpenAI]
+  O --> R[Structured Response]
 ```
 
 | Step | Description |
 |------|-------------|
 | **User** | Submits a Halachic question in Hebrew. |
 | **Next.js** | App (Server Action) receives the query. |
-| **Tavily** | Domain-restricted search (Sefaria, HebrewBooks, Yeshiva.org.il, etc.). |
-| **OpenAI** | GPT-4o-mini analyzes results and synthesizes an answer with מסקנה להלכה. |
+| **Tavily** | Searches the configured Halachic sources (Sefaria, HebrewBooks, Din.org.il, Yeshiva.org.il, etc.). |
+| **Context** | Search results are aggregated and passed to OpenAI. |
+| **OpenAI** | GPT-4o-mini analyzes context and synthesizes an answer with מסקנה להלכה. |
 | **Structured Response** | Answer + source links returned to the user. |
 
 ---
