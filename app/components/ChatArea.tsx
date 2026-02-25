@@ -237,29 +237,33 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
                           </div>
                         )}
                         {msg.role === "assistant" && "content" in msg && (
-                          <div className="mt-3 flex flex-wrap gap-2 border-t border-gray-200 dark:border-gray-600 pt-3">
-                            <button
-                              type="button"
-                              onClick={() => handleCopy(msg.content, i)}
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--halacha-gold)]/40 bg-transparent px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-[var(--halacha-gold)]/10 dark:text-gray-300 dark:hover:bg-[var(--halacha-gold)]/15"
-                              aria-label="Copy"
-                            >
-                              <Copy className="h-3.5 w-3.5" aria-hidden />
-                              {copyFeedback === i ? (
-                                <span className="text-[var(--halacha-gold)]" dir="rtl">הועתק</span>
-                              ) : (
-                                <span dir="rtl">העתק</span>
+                          <div className="mt-3 flex items-center gap-1.5 border-t border-[#FFD700]/20 pt-2.5">
+                            <div className="relative">
+                              <button
+                                type="button"
+                                onClick={() => handleCopy(msg.content, i)}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#FFD700]/50 text-[#FFD700]/90 transition-colors hover:bg-[#FFD700]/15 hover:border-[#FFD700]/70"
+                                aria-label="Copy"
+                              >
+                                <Copy className="h-3.5 w-3.5" aria-hidden />
+                              </button>
+                              {copyFeedback === i && (
+                                <span
+                                  className="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-2 py-0.5 text-[10px] font-medium text-white shadow dark:bg-gray-700"
+                                  role="status"
+                                >
+                                  Copied!
+                                </span>
                               )}
-                            </button>
+                            </div>
                             <a
                               href={`https://wa.me/?text=${encodeURIComponent(msg.content)}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--halacha-gold)]/40 bg-transparent px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-[var(--halacha-gold)]/10 dark:text-gray-300 dark:hover:bg-[var(--halacha-gold)]/15"
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#FFD700]/50 text-[#FFD700]/90 transition-colors hover:bg-[#FFD700]/15 hover:border-[#FFD700]/70"
                               aria-label="Share to WhatsApp"
                             >
                               <Share2 className="h-3.5 w-3.5" aria-hidden />
-                              <span dir="rtl">שתף לוואטסאפ</span>
                             </a>
                           </div>
                         )}
