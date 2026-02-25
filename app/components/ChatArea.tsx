@@ -147,26 +147,15 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
 
     const recognition = new SpeechRecognitionAPI();
     recognition.lang = "he-IL";
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.continuous = false;
+    recognition.interimResults = false;
 
     recognition.onresult = (event: any) => {
-      let final = "";
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          final += transcript;
-        } else {
-          interim += transcript;
-        }
-      }
-      setInput((prev) => {
-        const base = prev.trimEnd();
-        if (final) return base ? `${base} ${final}` : final;
-        if (interim) return base ? `${base} ${interim}` : interim;
-        return prev;
-      });
+      if (!event.results?.length) return;
+      const lastResult = event.results[event.results.length - 1];
+      const transcript = (lastResult[0]?.transcript ?? "").trim();
+      if (!transcript) return;
+      setInput((prev) => (prev ? `${prev.trimEnd()} ${transcript}` : transcript));
     };
 
     recognition.onend = () => setIsListening(false);
