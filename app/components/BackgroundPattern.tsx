@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const GOLD_PALETTE = ["#d4af37", "#f0c040", "#c9a227", "#ffd700"];
 
@@ -34,44 +34,42 @@ function generateStars(
       size: sizeMin + Math.random() * (sizeMax - sizeMin),
       color: pick(palette, Math.floor(Math.random() * palette.length)),
       opacity: opacityMin + Math.random() * (opacityMax - opacityMin),
-      twinkleDur: 2 + Math.random() * 3,
+      twinkleDur: 3 + Math.random() * 4,
       twinkleDelay: Math.random() * 5,
     });
   }
   return stars;
 }
 
-const LIGHT_BG = "#fffdf7";
-const DARK_BG = "#0a0a0f";
+const LERP = 0.05;
+const LAYER1_MOUSE_FACTOR = 0.02;
+const LAYER2_MOUSE_FACTOR = 0.05;
+const LAYER3_MOUSE_FACTOR = 0.08;
 
-/* Shooting star: head + trail, diagonal streak across screen */
+/* Very subtle shooting star – 1–2 only, infrequent */
 function ShootingStar({ delay }: { delay: number }) {
   return (
     <div
-      className="pointer-events-none absolute left-0 top-0 overflow-visible"
+      className="pointer-events-none absolute left-0 top-0 overflow-visible opacity-40"
       aria-hidden
       style={{
-        animation: "shootingStar 2.2s ease-in-out infinite",
+        animation: "shootingStarSubtle 2.5s ease-out infinite",
         animationDelay: `${delay}s`,
         willChange: "transform",
       }}
     >
-      {/* Trail behind the head (to the left; head leads toward bottom-right) */}
       <div
-        className="absolute top-1/2 h-0.5 -translate-y-1/2 rounded-full"
+        className="absolute top-1/2 h-px -translate-y-1/2 rounded-full"
         style={{
-          left: "-70px",
-          width: "70px",
-          background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.3) 25%, rgba(255,215,0,0.7) 60%, #ffd700 100%)",
-          boxShadow: "0 0 6px 2px rgba(255,215,0,0.4), 0 0 12px 4px rgba(240,192,64,0.3)",
+          left: "-40px",
+          width: "40px",
+          background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.15) 40%, rgba(255,215,0,0.35) 100%)",
+          boxShadow: "0 0 3px 1px rgba(255,215,0,0.2)",
         }}
       />
-      {/* Bright head at leading edge */}
       <div
-        className="absolute left-0 top-1/2 h-2 w-2 -translate-y-1/2 -translate-x-1 rounded-full bg-white"
-        style={{
-          boxShadow: "0 0 6px 2px #ffd700, 0 0 10px 4px rgba(255,255,255,0.8), 0 0 14px 6px rgba(255,215,0,0.5)",
-        }}
+        className="absolute left-0 top-1/2 h-1 w-1 -translate-y-1/2 -translate-x-0.5 rounded-full bg-[#ffd700]"
+        style={{ boxShadow: "0 0 3px 1px rgba(255,215,0,0.4)" }}
       />
     </div>
   );
@@ -82,13 +80,72 @@ export default function BackgroundPattern() {
   const [layer2, setLayer2] = useState<StarData[]>([]);
   const [layer3, setLayer3] = useState<StarData[]>([]);
 
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const currentRef = useRef({
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 0,
+    x3: 0,
+    y3: 0,
+  });
+  const [transform, setTransform] = useState({
+    layer1: "translate(0px, 0px)",
+    layer2: "translate(0px, 0px)",
+    layer3: "translate(0px, 0px)",
+  });
+  const rafRef = useRef<number | null>(null);
+
   useEffect(() => {
-    /* Layer 1: smaller, slower feel – 2–4px, opacity 0.6–0.85 */
-    setLayer1(generateStars(55, 2, 4, 0.6, 0.85, GOLD_PALETTE));
-    /* Layer 2: medium – 3–5px, opacity 0.7–0.95 */
-    setLayer2(generateStars(40, 3, 5, 0.7, 0.95, GOLD_PALETTE));
-    /* Layer 3: brighter/larger – 4–8px (some “bright” stars), opacity 0.75–1 */
-    setLayer3(generateStars(30, 4, 8, 0.75, 1, GOLD_PALETTE));
+    setLayer1(generateStars(60, 1, 2, 0.2, 0.4, GOLD_PALETTE));
+    setLayer2(generateStars(45, 1.5, 2.5, 0.25, 0.45, GOLD_PALETTE));
+    setLayer3(generateStars(35, 2, 4, 0.3, 0.5, GOLD_PALETTE));
+  }, []);
+
+  const onMouseMove = useCallback((e: MouseEvent) => {
+    const w = typeof window !== "undefined" ? window.innerWidth : 1920;
+    const h = typeof window !== "undefined" ? window.innerHeight : 1080;
+    mouseRef.current = {
+      x: e.clientX - w / 2,
+      y: e.clientY - h / 2,
+    };
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMouseMove);
+  }, [onMouseMove]);
+
+  useEffect(() => {
+    const tick = () => {
+      const { x: mx, y: my } = mouseRef.current;
+      const c = currentRef.current;
+
+      const t1x = mx * LAYER1_MOUSE_FACTOR;
+      const t1y = my * LAYER1_MOUSE_FACTOR;
+      const t2x = mx * LAYER2_MOUSE_FACTOR;
+      const t2y = my * LAYER2_MOUSE_FACTOR;
+      const t3x = mx * LAYER3_MOUSE_FACTOR;
+      const t3y = my * LAYER3_MOUSE_FACTOR;
+
+      c.x1 += (t1x - c.x1) * LERP;
+      c.y1 += (t1y - c.y1) * LERP;
+      c.x2 += (t2x - c.x2) * LERP;
+      c.y2 += (t2y - c.y2) * LERP;
+      c.x3 += (t3x - c.x3) * LERP;
+      c.y3 += (t3y - c.y3) * LERP;
+
+      setTransform({
+        layer1: `translate(${c.x1}px, ${c.y1}px)`,
+        layer2: `translate(${c.x2}px, ${c.y2}px)`,
+        layer3: `translate(${c.x3}px, ${c.y3}px)`,
+      });
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   const renderStar = (s: StarData, i: number) => (
@@ -103,7 +160,7 @@ export default function BackgroundPattern() {
         backgroundColor: s.color,
         opacity: s.opacity,
         transform: "translate(-50%, -50%)",
-        boxShadow: "0 0 6px 2px #ffd700, 0 0 12px 4px rgba(240,192,64,0.5)",
+        boxShadow: "0 0 3px 1px #ffd700",
         animation: `starTwinkleGlow ${s.twinkleDur}s ease-in-out infinite`,
         animationDelay: `${s.twinkleDelay}s`,
       }}
@@ -116,51 +173,56 @@ export default function BackgroundPattern() {
       className="pointer-events-none fixed inset-0 z-[1] overflow-hidden bg-[#fffdf7] dark:bg-[#0a0a0f]"
       aria-hidden
     >
-      {/* Layer 1 */}
-      <div className="star-drift-1 absolute inset-0" style={{ willChange: "transform" }}>
-        {layer1.map((s, i) => renderStar(s, i))}
+      {/* Layer 1 – tiny, 2% mouse + subtle drift */}
+      <div className="star-drift-subtle-1 absolute inset-0">
+        <div style={{ willChange: "transform", transform: transform.layer1 }} className="absolute inset-0">
+          {layer1.map((s, i) => renderStar(s, i))}
+        </div>
       </div>
-      {/* Layer 2 */}
-      <div className="star-drift-2 absolute inset-0" style={{ willChange: "transform" }}>
-        {layer2.map((s, i) => renderStar(s, i))}
+      {/* Layer 2 – small, 5% mouse + subtle drift */}
+      <div className="star-drift-subtle-2 absolute inset-0">
+        <div style={{ willChange: "transform", transform: transform.layer2 }} className="absolute inset-0">
+          {layer2.map((s, i) => renderStar(s, i))}
+        </div>
       </div>
-      {/* Layer 3 */}
-      <div className="star-drift-3 absolute inset-0" style={{ willChange: "transform" }}>
-        {layer3.map((s, i) => renderStar(s, i))}
-      </div>
-
-      {/* Dark mode: extra bright gold + white glow stars + white palette overlay feel is via same glow; we use same data but could swap palette in dark. For “bright gold + white” in dark we need stars to use GOLD_PALETTE_DARK when in dark mode. We can’t switch data by theme in SSR. So use CSS: in dark mode add a class that makes stars brighter or use a separate dark-only layer. Simpler: use one set of stars; in dark mode the #0a0a0f background makes gold pop. Optionally add a few “white” glow stars only in dark with a dark: variant. I'll add a small dark-only layer with white-gold stars. */}
-      <div className="dark:block hidden absolute inset-0" aria-hidden>
-        <div className="star-drift-4 absolute inset-0" style={{ willChange: "transform" }}>
-          {layer3.length > 0 &&
-            layer3.slice(0, 8).map((s, i) => (
-              <span
-                key={`dm-${i}`}
-                className="star-twinkle-glow absolute rounded-full"
-              style={{
-                left: `${(s.left + 10) % 100}%`,
-                top: `${(s.top + 5) % 100}%`,
-                width: Math.min(s.size + 2, 8),
-                height: Math.min(s.size + 2, 8),
-                backgroundColor: "#fff8e7",
-                opacity: 0.85,
-                transform: "translate(-50%, -50%)",
-                boxShadow: "0 0 8px 2px #ffd700, 0 0 16px 6px rgba(255,255,255,0.4), 0 0 24px 8px rgba(255,215,0,0.3)",
-                animation: `starTwinkleGlow ${s.twinkleDur}s ease-in-out infinite`,
-                animationDelay: `${s.twinkleDelay + 1}s`,
-              }}
-              aria-hidden
-              />
-            ))}
+      {/* Layer 3 – medium, 8% mouse + subtle drift */}
+      <div className="star-drift-subtle-3 absolute inset-0">
+        <div style={{ willChange: "transform", transform: transform.layer3 }} className="absolute inset-0">
+          {layer3.map((s, i) => renderStar(s, i))}
         </div>
       </div>
 
-      {/* Shooting stars – 5 with staggered delays */}
+      {/* Dark mode: same subtle stars, slightly more visible on dark bg */}
+      <div className="dark:block hidden absolute inset-0" aria-hidden>
+        <div className="star-drift-subtle-4 absolute inset-0">
+          <div style={{ willChange: "transform", transform: transform.layer3 }} className="absolute inset-0">
+          {layer3.length > 0 &&
+            layer3.slice(0, 6).map((s, i) => (
+              <span
+                key={`dm-${i}`}
+                className="star-twinkle-glow absolute rounded-full"
+                style={{
+                  left: `${(s.left + 15) % 100}%`,
+                  top: `${(s.top + 10) % 100}%`,
+                  width: Math.min(s.size + 0.5, 4),
+                  height: Math.min(s.size + 0.5, 4),
+                  backgroundColor: "#fff8e7",
+                  opacity: 0.35,
+                  transform: "translate(-50%, -50%)",
+                  boxShadow: "0 0 3px 1px #ffd700",
+                  animation: `starTwinkleGlow ${s.twinkleDur}s ease-in-out infinite`,
+                  animationDelay: `${s.twinkleDelay + 1}s`,
+                }}
+                aria-hidden
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 2 very subtle shooting stars, infrequent */}
       <ShootingStar delay={0} />
-      <ShootingStar delay={10} />
-      <ShootingStar delay={22} />
-      <ShootingStar delay={35} />
-      <ShootingStar delay={48} />
+      <ShootingStar delay={45} />
     </div>
   );
 }

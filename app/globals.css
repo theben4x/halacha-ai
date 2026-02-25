@@ -161,104 +161,92 @@ input::placeholder {
   box-shadow: 0 0 6px 2px #ffd700, 0 0 12px 4px rgba(240, 192, 64, 0.6);
 }
 
-/* Unified star background: autonomous drift (no mouse) */
-@keyframes starDrift1 {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(3vw, 2vh);
-  }
-  50% {
-    transform: translate(-2vw, 3vh);
-  }
-  75% {
-    transform: translate(2vw, -1vh);
-  }
-}
-
-@keyframes starDrift2 {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  33% {
-    transform: translate(-3vw, -2vh);
-  }
-  66% {
-    transform: translate(2vw, 1.5vh);
-  }
-}
-
-@keyframes starDrift3 {
+/* Subtle autonomous drift – 20s–40s, barely noticeable */
+@keyframes starDriftSubtle1 {
   0%,
   100% {
     transform: translate(0, 0);
   }
   50% {
-    transform: translate(2.5vw, -2.5vh);
+    transform: translate(0.4vw, 0.3vh);
   }
 }
 
-@keyframes starDrift4 {
+@keyframes starDriftSubtle2 {
   0%,
   100% {
     transform: translate(0, 0);
   }
-  25% {
-    transform: translate(-2vw, 2vh);
-  }
-  75% {
-    transform: translate(2vw, -2vh);
+  50% {
+    transform: translate(-0.3vw, -0.4vh);
   }
 }
 
-/* Twinkle: full brightness to 60% */
+@keyframes starDriftSubtle3 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(0.35vw, -0.35vh);
+  }
+}
+
+@keyframes starDriftSubtle4 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-0.25vw, 0.3vh);
+  }
+}
+
+.star-drift-subtle-1 {
+  animation: starDriftSubtle1 35s ease-in-out infinite;
+  will-change: transform;
+}
+
+.star-drift-subtle-2 {
+  animation: starDriftSubtle2 28s ease-in-out infinite;
+  will-change: transform;
+}
+
+.star-drift-subtle-3 {
+  animation: starDriftSubtle3 40s ease-in-out infinite;
+  will-change: transform;
+}
+
+.star-drift-subtle-4 {
+  animation: starDriftSubtle4 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Twinkle: gentle pulse (subtle) */
 @keyframes starTwinkleGlow {
   0%,
   100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.6;
+    opacity: 0.7;
   }
 }
 
-.star-drift-1 {
-  animation: starDrift1 45s ease-in-out infinite;
-  will-change: transform;
-}
-
-.star-drift-2 {
-  animation: starDrift2 60s ease-in-out infinite;
-  will-change: transform;
-}
-
-.star-drift-3 {
-  animation: starDrift3 35s ease-in-out infinite;
-  will-change: transform;
-}
-
-.star-drift-4 {
-  animation: starDrift4 55s ease-in-out infinite;
-  will-change: transform;
-}
-
-/* Shooting star: diagonal streak */
-@keyframes shootingStar {
+/* Very subtle shooting star – infrequent */
+@keyframes shootingStarSubtle {
   0% {
-    transform: translate(-20%, -20%) scaleX(1);
+    transform: translate(-15%, -15%);
     opacity: 0;
   }
-  5% {
-    opacity: 1;
+  8% {
+    opacity: 0.4;
   }
-  95% {
-    opacity: 0.8;
+  92% {
+    opacity: 0.25;
   }
   100% {
-    transform: translate(120%, 120%) scaleX(1);
+    transform: translate(115%, 115%);
     opacity: 0;
   }
 }
