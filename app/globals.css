@@ -86,3 +86,77 @@ input::placeholder {
 .fade-in-up {
   animation: fadeInUp 0.8s ease-out forwards;
 }
+
+/* Parallax star background (gold stars on dark) – GPU-friendly */
+@keyframes starDriftSlow {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(2%, 1%);
+  }
+  50% {
+    transform: translate(-1%, 2%);
+  }
+  75% {
+    transform: translate(1%, -1%);
+  }
+}
+
+@keyframes starDriftMid {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(-2%, -1%);
+  }
+  66% {
+    transform: translate(1%, 1.5%);
+  }
+}
+
+@keyframes starDriftFast {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-1.5%, -2%);
+  }
+}
+
+@keyframes starTwinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.star-layer {
+  will-change: transform;
+}
+
+.star-layer--back {
+  animation: starDriftSlow 80s ease-in-out infinite;
+}
+
+.star-layer--mid {
+  animation: starDriftMid 50s ease-in-out infinite;
+}
+
+.star-layer--front {
+  animation: starDriftFast 30s ease-in-out infinite;
+}
+
+.star--twinkle {
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+.star--glow {
+  box-shadow: 0 0 8px #ffd700, 0 0 12px rgba(255, 215, 0, 0.4);
+}
