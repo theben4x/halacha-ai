@@ -184,10 +184,10 @@ export default function BackgroundPattern() {
       className="pointer-events-none fixed inset-0 z-[1] overflow-hidden bg-[#FFFFFF] dark:bg-[#0a0a0f]"
       aria-hidden
     >
-      {/* Gold rings + dashed circles – behind mesh and stars (z-index: -1) */}
+      {/* Gold rings + dashed circles – very subtle (opacity 0.15), behind mesh and stars */}
       <div
         className="absolute inset-0 dark:opacity-90"
-        style={{ zIndex: -1 }}
+        style={{ zIndex: -1, opacity: 0.15 }}
         aria-hidden
       >
         {/* 2 large gold rings */}
@@ -199,7 +199,6 @@ export default function BackgroundPattern() {
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
-            opacity: 0.25,
             borderWidth: "1px",
           }}
         />
@@ -211,11 +210,10 @@ export default function BackgroundPattern() {
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
-            opacity: 0.2,
             borderWidth: "1px",
           }}
         />
-        {/* Dashed circular lines – 1px dashed rgba(255, 215, 0, 0.2) */}
+        {/* Golden dashed rings */}
         <div
           className="absolute rounded-full bg-transparent"
           style={{
@@ -224,7 +222,7 @@ export default function BackgroundPattern() {
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
-            border: "1px dashed rgba(255, 215, 0, 0.2)",
+            border: "1px dashed rgba(255, 215, 0, 1)",
           }}
         />
         <div
@@ -235,7 +233,7 @@ export default function BackgroundPattern() {
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
-            border: "1px dashed rgba(255, 215, 0, 0.2)",
+            border: "1px dashed rgba(255, 215, 0, 1)",
           }}
         />
         <div
@@ -246,7 +244,7 @@ export default function BackgroundPattern() {
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
-            border: "1px dashed rgba(255, 215, 0, 0.2)",
+            border: "1px dashed rgba(255, 215, 0, 1)",
           }}
         />
       </div>
