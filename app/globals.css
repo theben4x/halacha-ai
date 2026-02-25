@@ -158,21 +158,111 @@ input::placeholder {
 }
 
 .star--glow {
-  box-shadow: 0 0 8px #ffd700, 0 0 12px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 6px 2px #ffd700, 0 0 12px 4px rgba(240, 192, 64, 0.6);
 }
 
-/* Light-mode gold stars: gentle twinkle with staggered delay */
-@keyframes starTwinkleLight {
+/* Unified star background: autonomous drift (no mouse) */
+@keyframes starDrift1 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(3vw, 2vh);
+  }
+  50% {
+    transform: translate(-2vw, 3vh);
+  }
+  75% {
+    transform: translate(2vw, -1vh);
+  }
+}
+
+@keyframes starDrift2 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(-3vw, -2vh);
+  }
+  66% {
+    transform: translate(2vw, 1.5vh);
+  }
+}
+
+@keyframes starDrift3 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(2.5vw, -2.5vh);
+  }
+}
+
+@keyframes starDrift4 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2vw, 2vh);
+  }
+  75% {
+    transform: translate(2vw, -2vh);
+  }
+}
+
+/* Twinkle: full brightness to 60% */
+@keyframes starTwinkleGlow {
   0%,
   100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.4;
+    opacity: 0.6;
   }
 }
 
-.star-twinkle-light {
-  animation: starTwinkleLight 4s ease-in-out infinite;
+.star-drift-1 {
+  animation: starDrift1 45s ease-in-out infinite;
+  will-change: transform;
+}
+
+.star-drift-2 {
+  animation: starDrift2 60s ease-in-out infinite;
+  will-change: transform;
+}
+
+.star-drift-3 {
+  animation: starDrift3 35s ease-in-out infinite;
+  will-change: transform;
+}
+
+.star-drift-4 {
+  animation: starDrift4 55s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Shooting star: diagonal streak */
+@keyframes shootingStar {
+  0% {
+    transform: translate(-20%, -20%) scaleX(1);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(120%, 120%) scaleX(1);
+    opacity: 0;
+  }
+}
+
+.star-twinkle-glow {
   will-change: opacity;
 }
