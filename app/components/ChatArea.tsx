@@ -54,7 +54,7 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
   const [isListening, setIsListening] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState<number | null>(null);
   const [hasSpeechRecognition, setHasSpeechRecognition] = useState(false);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -133,9 +133,8 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
 
   const toggleMic = useCallback(() => {
     if (typeof window === "undefined") return;
-    const SpeechRecognitionAPI =
-      (window as unknown as { SpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition ||
-      (window as unknown as { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition;
+    const win = window as unknown as { SpeechRecognition?: new () => any; webkitSpeechRecognition?: new () => any };
+    const SpeechRecognitionAPI = win.SpeechRecognition || win.webkitSpeechRecognition;
     if (!SpeechRecognitionAPI) {
       return;
     }
@@ -151,7 +150,7 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
     recognition.continuous = true;
     recognition.interimResults = true;
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: any) => {
       let final = "";
       let interim = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
