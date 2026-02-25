@@ -1,14 +1,172 @@
 "use client";
 
-/* Gold parallax stars – 3 layers, dark background. Only visible in dark mode. */
+import { useCallback, useEffect, useRef, useState } from "react";
 
+/* Gold star colors only */
+const GOLD_PALETTE = ["#d4af37", "#f0c040", "#c9a227", "#ffd700"];
+
+function pick<T>(arr: T[], i: number): T {
+  return arr[i % arr.length];
+}
+
+type StarData = { left: number; top: number; size: number; color: string; opacity: number; delay: number };
+
+function generateStars(
+  count: number,
+  sizeMin: number,
+  sizeMax: number,
+  opacity: number
+): StarData[] {
+  const stars: StarData[] = [];
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      size: sizeMin + Math.random() * (sizeMax - sizeMin),
+      color: pick(GOLD_PALETTE, Math.floor(Math.random() * GOLD_PALETTE.length)),
+      opacity,
+      delay: Math.random() * 4,
+    });
+  }
+  return stars;
+}
+
+const LIGHT_BG = "#fffdf7";
+
+/* Light mode: white background + gold stars (3 layers, twinkle, mouse parallax) */
+function LightModeStars() {
+  const [starsLayer1, setStarsLayer1] = useState<StarData[]>([]);
+  const [starsLayer2, setStarsLayer2] = useState<StarData[]>([]);
+  const [starsLayer3, setStarsLayer3] = useState<StarData[]>([]);
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const rafRef = useRef<number | null>(null);
+  const lastRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    setStarsLayer1(generateStars(80, 1, 1, 0.3));
+    setStarsLayer2(generateStars(50, 1, 2, 0.5));
+    setStarsLayer3(generateStars(35, 2, 3, 0.8));
+  }, []);
+
+  const onMouseMove = useCallback((e: MouseEvent) => {
+    lastRef.current = { x: e.clientX, y: e.clientY };
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      const { innerWidth, innerHeight } = window;
+      const x = (lastRef.current.x / innerWidth) * 2 - 1;
+      const y = (lastRef.current.y / innerHeight) * 2 - 1;
+      setMouse({ x, y });
+    });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, [onMouseMove]);
+
+  const speed1 = 12;
+  const speed2 = 28;
+  const speed3 = 48;
+  const tx1 = mouse.x * speed1;
+  const ty1 = mouse.y * speed1;
+  const tx2 = mouse.x * speed2;
+  const ty2 = mouse.y * speed2;
+  const tx3 = mouse.x * speed3;
+  const ty3 = mouse.y * speed3;
+
+  return (
+    <div
+      className="pointer-events-none fixed inset-0 z-[1] overflow-hidden dark:hidden"
+      aria-hidden
+      style={{ backgroundColor: LIGHT_BG }}
+    >
+      <div
+        className="star-layer absolute inset-0"
+        style={{
+          willChange: "transform",
+          transform: `translate(${tx1}px, ${ty1}px)`,
+        }}
+      >
+        {starsLayer1.map((s, i) => (
+          <span
+            key={i}
+            className="star-twinkle-light absolute rounded-full"
+            style={{
+              left: `${s.left}%`,
+              top: `${s.top}%`,
+              width: s.size,
+              height: s.size,
+              backgroundColor: s.color,
+              opacity: s.opacity,
+              transform: "translate(-50%, -50%)",
+              animationDelay: `${s.delay}s`,
+            }}
+          />
+        ))}
+      </div>
+      <div
+        className="star-layer absolute inset-0"
+        style={{
+          willChange: "transform",
+          transform: `translate(${tx2}px, ${ty2}px)`,
+        }}
+      >
+        {starsLayer2.map((s, i) => (
+          <span
+            key={i}
+            className="star-twinkle-light absolute rounded-full"
+            style={{
+              left: `${s.left}%`,
+              top: `${s.top}%`,
+              width: s.size,
+              height: s.size,
+              backgroundColor: s.color,
+              opacity: s.opacity,
+              transform: "translate(-50%, -50%)",
+              animationDelay: `${s.delay}s`,
+            }}
+          />
+        ))}
+      </div>
+      <div
+        className="star-layer absolute inset-0"
+        style={{
+          willChange: "transform",
+          transform: `translate(${tx3}px, ${ty3}px)`,
+        }}
+      >
+        {starsLayer3.map((s, i) => (
+          <span
+            key={i}
+            className="star-twinkle-light absolute rounded-full"
+            style={{
+              left: `${s.left}%`,
+              top: `${s.top}%`,
+              width: s.size,
+              height: s.size,
+              backgroundColor: s.color,
+              opacity: s.opacity,
+              transform: "translate(-50%, -50%)",
+              animationDelay: `${s.delay}s`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* Dark mode: existing gold stars on deep night (unchanged) */
 const GOLD = "#FFD700";
 const GOLDENROD = "#DAA520";
 const DARK_GOLD = "#B8860B";
 
 type Star = { left: number; top: number; size: number; glow?: boolean; twinkle?: boolean; color: string };
 
-/* Layer 1: far (small, slow) */
 const LAYER_BACK: Star[] = [
   { left: 5, top: 10, size: 2, color: GOLD, twinkle: true },
   { left: 18, top: 22, size: 2, color: GOLDENROD },
@@ -27,7 +185,6 @@ const LAYER_BACK: Star[] = [
   { left: 38, top: 88, size: 2, color: GOLDENROD },
 ];
 
-/* Layer 2: mid (medium, medium speed) */
 const LAYER_MID: Star[] = [
   { left: 10, top: 25, size: 3, color: GOLD, glow: true },
   { left: 25, top: 12, size: 3, color: GOLDENROD, twinkle: true },
@@ -47,7 +204,6 @@ const LAYER_MID: Star[] = [
   { left: 95, top: 88, size: 3, color: GOLDENROD, twinkle: true },
 ];
 
-/* Layer 3: front (slightly larger, faster) */
 const LAYER_FRONT: Star[] = [
   { left: 14, top: 18, size: 4, color: GOLD, glow: true, twinkle: true },
   { left: 36, top: 32, size: 4, color: GOLDENROD, twinkle: true },
@@ -84,7 +240,7 @@ function StarDot({ star, className }: { star: Star; className?: string }) {
   );
 }
 
-function StarLayer({
+function DarkStarLayer({
   stars,
   layerClass,
 }: {
@@ -103,29 +259,16 @@ function StarLayer({
 export default function BackgroundPattern() {
   return (
     <>
-      {/* Light mode: subtle grid (original) */}
-      <div
-        className="pointer-events-none fixed inset-0 z-[1] overflow-hidden opacity-[0.1] dark:opacity-0"
-        aria-hidden
-        style={{
-          backgroundImage: `
-            linear-gradient(var(--halacha-gold) 1px, transparent 1px),
-            linear-gradient(90deg, var(--halacha-gold) 1px, transparent 1px),
-            linear-gradient(135deg, var(--halacha-gold) 0.5px, transparent 0.5px)
-          `,
-          backgroundSize: "48px 48px, 48px 48px, 32px 32px",
-          backgroundPosition: "0 0, 0 0, 0 0",
-        }}
-      />
+      <LightModeStars />
       {/* Dark mode: gold parallax stars on deep night background */}
       <div
         className="pointer-events-none fixed inset-0 z-[1] overflow-hidden dark:block hidden"
         aria-hidden
         style={{ background: "linear-gradient(180deg, #030712 0%, #020617 50%, #0a0a0f 100%)" }}
       >
-        <StarLayer stars={LAYER_BACK} layerClass="star-layer--back" />
-        <StarLayer stars={LAYER_MID} layerClass="star-layer--mid" />
-        <StarLayer stars={LAYER_FRONT} layerClass="star-layer--front" />
+        <DarkStarLayer stars={LAYER_BACK} layerClass="star-layer--back" />
+        <DarkStarLayer stars={LAYER_MID} layerClass="star-layer--mid" />
+        <DarkStarLayer stars={LAYER_FRONT} layerClass="star-layer--front" />
       </div>
     </>
   );

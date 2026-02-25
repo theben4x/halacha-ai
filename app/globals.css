@@ -160,3 +160,19 @@ input::placeholder {
 .star--glow {
   box-shadow: 0 0 8px #ffd700, 0 0 12px rgba(255, 215, 0, 0.4);
 }
+
+/* Light-mode gold stars: gentle twinkle with staggered delay */
+@keyframes starTwinkleLight {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.star-twinkle-light {
+  animation: starTwinkleLight 4s ease-in-out infinite;
+  will-change: opacity;
+}
