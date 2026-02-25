@@ -74,6 +74,7 @@ flowchart TB
 | **Search**    | Tavily API |
 | **LLM**       | OpenAI (GPT-4o-mini) |
 | **Icons**     | Lucide React |
+| **Other**     | Python |
 
 ---
 
