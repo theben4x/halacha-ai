@@ -232,6 +232,89 @@ export default function BackgroundPattern() {
         />
       </div>
 
+      {/* Abstract geometric shapes: rings + dashed curves (on mesh, behind stars) */}
+      <div className="absolute inset-0 dark:opacity-80" aria-hidden>
+        {/* Large hollow circles (rings) – thin gold border, low opacity */}
+        <div
+          className="bg-shape-float absolute rounded-full border border-[#d4af37]"
+          style={{
+            width: "min(85vmin, 520px)",
+            height: "min(85vmin, 520px)",
+            left: "5%",
+            top: "10%",
+            opacity: 0.2,
+            borderWidth: "1px",
+          }}
+        />
+        <div
+          className="bg-shape-rotate absolute rounded-full border border-[#d4af37]"
+          style={{
+            width: "min(70vmin, 420px)",
+            height: "min(70vmin, 420px)",
+            right: "0%",
+            bottom: "15%",
+            opacity: 0.15,
+            borderWidth: "1px",
+          }}
+        />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div
+            className="bg-shape-float-alt rounded-full border border-[#d4af37]"
+            style={{
+              width: "min(55vmin, 340px)",
+              height: "min(55vmin, 340px)",
+              opacity: 0.12,
+              borderWidth: "1px",
+            }}
+          />
+        </div>
+
+        {/* Dashed curved lines – SVG paths (viewBox 0 0 100 100 = % of area) */}
+        <svg
+          className="absolute inset-0 h-full w-full bg-shape-float-alt"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          style={{ overflow: "visible" }}
+          aria-hidden
+        >
+          <defs>
+            <linearGradient id="goldLine1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#d4af37" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="#ffd700" stopOpacity="0.25" />
+            </linearGradient>
+            <linearGradient id="goldLine2" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#d4af37" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#d4af37" stopOpacity="0.08" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M -5 25 Q 30 5, 60 30 T 115 20 T 110 55"
+            fill="none"
+            stroke="url(#goldLine1)"
+            strokeWidth="0.4"
+            strokeDasharray="4 3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 0 55 C 35 15, 65 85, 100 45"
+            fill="none"
+            stroke="#d4af37"
+            strokeWidth="0.4"
+            strokeDasharray="3 5"
+            strokeLinecap="round"
+            opacity="0.2"
+          />
+          <path
+            d="M 95 0 Q 55 40, 15 75 T -5 105"
+            fill="none"
+            stroke="url(#goldLine2)"
+            strokeWidth="0.4"
+            strokeDasharray="4 4"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
+
       {/* Layer 1 – subtle drift + per-star cursor reaction */}
       <div className="star-drift-subtle-1 absolute inset-0">
         {layer1.map((s, i) => renderStar(s, i, layer1Ref))}

@@ -254,3 +254,51 @@ input::placeholder {
 .star-twinkle-glow {
   will-change: opacity;
 }
+
+/* Abstract geometric shapes – very slow float/rotate */
+@keyframes shapeFloat {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(1.5%, 1%) rotate(1.5deg);
+  }
+}
+
+@keyframes shapeFloatAlt {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(-1%, -0.5%) rotate(-1deg);
+  }
+  66% {
+    transform: translate(0.5%, 1%) rotate(0.5deg);
+  }
+}
+
+@keyframes shapeRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.bg-shape-float {
+  animation: shapeFloat 45s ease-in-out infinite;
+  will-change: transform;
+}
+
+.bg-shape-float-alt {
+  animation: shapeFloatAlt 55s ease-in-out infinite;
+  will-change: transform;
+}
+
+.bg-shape-rotate {
+  animation: shapeRotate 120s linear infinite;
+  will-change: transform;
+}
