@@ -184,6 +184,73 @@ export default function BackgroundPattern() {
       className="pointer-events-none fixed inset-0 z-[1] overflow-hidden bg-[#FFFFFF] dark:bg-[#0a0a0f]"
       aria-hidden
     >
+      {/* Gold rings + dashed circles – behind mesh and stars (z-index: -1) */}
+      <div
+        className="absolute inset-0 dark:opacity-90"
+        style={{ zIndex: -1 }}
+        aria-hidden
+      >
+        {/* 2 large gold rings */}
+        <div
+          className="absolute rounded-full border border-[#d4af37] bg-transparent"
+          style={{
+            width: "min(90vmin, 560px)",
+            height: "min(90vmin, 560px)",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            opacity: 0.25,
+            borderWidth: "1px",
+          }}
+        />
+        <div
+          className="absolute rounded-full border border-[#d4af37] bg-transparent"
+          style={{
+            width: "min(70vmin, 420px)",
+            height: "min(70vmin, 420px)",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            opacity: 0.2,
+            borderWidth: "1px",
+          }}
+        />
+        {/* Dashed circular lines – 1px dashed rgba(255, 215, 0, 0.2) */}
+        <div
+          className="absolute rounded-full bg-transparent"
+          style={{
+            width: "min(85vmin, 500px)",
+            height: "min(85vmin, 500px)",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            border: "1px dashed rgba(255, 215, 0, 0.2)",
+          }}
+        />
+        <div
+          className="absolute rounded-full bg-transparent"
+          style={{
+            width: "min(60vmin, 360px)",
+            height: "min(60vmin, 360px)",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            border: "1px dashed rgba(255, 215, 0, 0.2)",
+          }}
+        />
+        <div
+          className="absolute rounded-full bg-transparent"
+          style={{
+            width: "min(40vmin, 240px)",
+            height: "min(40vmin, 240px)",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            border: "1px dashed rgba(255, 215, 0, 0.2)",
+          }}
+        />
+      </div>
+
       {/* Mesh gradient: soft blurry orbs (light mode only) – Pure White + Anti-Flash White */}
       <div className="absolute inset-0 dark:opacity-0" aria-hidden>
         <div

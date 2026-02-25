@@ -23,6 +23,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Halacha.ai - Accurate Answers from Original Sources",
   description: "Ask Halachic questions and receive answers grounded in Shulchan Aruch, Mishnah Berurah, and authoritative texts.",
+  icons: {
+    icon: [{ url: "/icon.png?v=1", href: "/icon.png?v=1" }],
+  },
 };
 
 export default function RootLayout({
