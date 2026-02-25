@@ -1,6 +1,6 @@
 # Halacha.ai
 
-**[→ Live app](https://halacha-ai-cshe.vercel.app/)**
+**[→ Live app](https://halaacha.com)**
 
 *תשובות הלכתיות מדויקות מהמקורות — AI-powered Halachic search in Hebrew.*
 
