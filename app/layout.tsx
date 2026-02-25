@@ -21,13 +21,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Halacha.ai - Accurate Answers from Original Sources",
-  description: "Ask Halachic questions and receive answers grounded in Shulchan Aruch, Mishnah Berurah, and authoritative texts.",
+  title: "Halacha.ai - תשובות הלכתיות מדויקות מהמקורות",
+  description:
+    "שאל שאלות בהלכה וקבל תשובות מבוססות על השולחן ערוך, המשנה ברורה ומקורות הפסיקה המוסמכים.",
   icons: {
     icon: "/favicon-32x32.png",
     apple: "/apple-touch-icon.png",
   },
   manifest: "/site.webmanifest",
+  openGraph: {
+    title: "Halacha.ai - תשובות הלכתיות מדויקות מהמקורות",
+    description:
+      "שאל שאלות בהלכה וקבל תשובות מבוססות על השולחן ערוך, המשנה ברורה ומקורות הפסיקה המוסמכים.",
+    images: ["/android-chrome-512x512.png"],
+  },
 };
 
 export default function RootLayout({
