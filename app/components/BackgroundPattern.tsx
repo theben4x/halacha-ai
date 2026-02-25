@@ -41,10 +41,33 @@ function generateStars(
   return stars;
 }
 
-const LERP = 0.05;
-const LAYER1_MOUSE_FACTOR = 0.02;
-const LAYER2_MOUSE_FACTOR = 0.05;
-const LAYER3_MOUSE_FACTOR = 0.08;
+const CURSOR_RADIUS = 150;
+const FORCE_STRENGTH = 0.15;
+const SIZE_FACTOR_BASE = 2.5; // star of this size has factor 1
+
+function applyStarMagnetic(
+  mouseX: number,
+  mouseY: number,
+  star: StarData,
+  w: number,
+  h: number
+): { moveX: number; moveY: number } {
+  const starX = (star.left / 100) * w;
+  const starY = (star.top / 100) * h;
+  const dx = mouseX - starX;
+  const dy = mouseY - starY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance >= CURSOR_RADIUS) {
+    return { moveX: 0, moveY: 0 };
+  }
+
+  const force = 1 - distance / CURSOR_RADIUS;
+  const sizeFactor = star.size / SIZE_FACTOR_BASE;
+  const moveX = -dx * force * FORCE_STRENGTH * sizeFactor;
+  const moveY = -dy * force * FORCE_STRENGTH * sizeFactor;
+  return { moveX, moveY };
+}
 
 /* Very subtle shooting star – 1–2 only, infrequent */
 function ShootingStar({ delay }: { delay: number }) {
@@ -81,19 +104,9 @@ export default function BackgroundPattern() {
   const [layer3, setLayer3] = useState<StarData[]>([]);
 
   const mouseRef = useRef({ x: 0, y: 0 });
-  const currentRef = useRef({
-    x1: 0,
-    y1: 0,
-    x2: 0,
-    y2: 0,
-    x3: 0,
-    y3: 0,
-  });
-  const [transform, setTransform] = useState({
-    layer1: "translate(0px, 0px)",
-    layer2: "translate(0px, 0px)",
-    layer3: "translate(0px, 0px)",
-  });
+  const layer1Ref = useRef<(HTMLSpanElement | null)[]>([]);
+  const layer2Ref = useRef<(HTMLSpanElement | null)[]>([]);
+  const layer3Ref = useRef<(HTMLSpanElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -103,12 +116,7 @@ export default function BackgroundPattern() {
   }, []);
 
   const onMouseMove = useCallback((e: MouseEvent) => {
-    const w = typeof window !== "undefined" ? window.innerWidth : 1920;
-    const h = typeof window !== "undefined" ? window.innerHeight : 1080;
-    mouseRef.current = {
-      x: e.clientX - w / 2,
-      y: e.clientY - h / 2,
-    };
+    mouseRef.current = { x: e.clientX, y: e.clientY };
   }, []);
 
   useEffect(() => {
@@ -118,39 +126,41 @@ export default function BackgroundPattern() {
 
   useEffect(() => {
     const tick = () => {
-      const { x: mx, y: my } = mouseRef.current;
-      const c = currentRef.current;
+      const { x: mouseX, y: mouseY } = mouseRef.current;
+      const w = typeof window !== "undefined" ? window.innerWidth : 1920;
+      const h = typeof window !== "undefined" ? window.innerHeight : 1080;
 
-      const t1x = mx * LAYER1_MOUSE_FACTOR;
-      const t1y = my * LAYER1_MOUSE_FACTOR;
-      const t2x = mx * LAYER2_MOUSE_FACTOR;
-      const t2y = my * LAYER2_MOUSE_FACTOR;
-      const t3x = mx * LAYER3_MOUSE_FACTOR;
-      const t3y = my * LAYER3_MOUSE_FACTOR;
+      const updateLayer = (stars: StarData[], refs: React.MutableRefObject<(HTMLSpanElement | null)[]>) => {
+        stars.forEach((star, i) => {
+          const el = refs.current[i];
+          if (!el) return;
+          const { moveX, moveY } = applyStarMagnetic(mouseX, mouseY, star, w, h);
+          el.style.transform = `translate(-50%, -50%) translate(${moveX}px, ${moveY}px)`;
+        });
+      };
 
-      c.x1 += (t1x - c.x1) * LERP;
-      c.y1 += (t1y - c.y1) * LERP;
-      c.x2 += (t2x - c.x2) * LERP;
-      c.y2 += (t2y - c.y2) * LERP;
-      c.x3 += (t3x - c.x3) * LERP;
-      c.y3 += (t3y - c.y3) * LERP;
+      updateLayer(layer1, layer1Ref);
+      updateLayer(layer2, layer2Ref);
+      updateLayer(layer3, layer3Ref);
 
-      setTransform({
-        layer1: `translate(${c.x1}px, ${c.y1}px)`,
-        layer2: `translate(${c.x2}px, ${c.y2}px)`,
-        layer3: `translate(${c.x3}px, ${c.y3}px)`,
-      });
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [layer1, layer2, layer3]);
 
-  const renderStar = (s: StarData, i: number) => (
+  const renderStar = (
+    s: StarData,
+    i: number,
+    layerRef: React.MutableRefObject<(HTMLSpanElement | null)[]>
+  ) => (
     <span
       key={i}
+      ref={(el) => {
+        layerRef.current[i] = el;
+      }}
       className="star-twinkle-glow absolute rounded-full"
       style={{
         left: `${s.left}%`,
@@ -160,6 +170,7 @@ export default function BackgroundPattern() {
         backgroundColor: s.color,
         opacity: s.opacity,
         transform: "translate(-50%, -50%)",
+        transition: "transform 0.3s ease-out",
         boxShadow: "0 0 3px 1px #ffd700",
         animation: `starTwinkleGlow ${s.twinkleDur}s ease-in-out infinite`,
         animationDelay: `${s.twinkleDelay}s`,
@@ -173,29 +184,22 @@ export default function BackgroundPattern() {
       className="pointer-events-none fixed inset-0 z-[1] overflow-hidden bg-[#fffdf7] dark:bg-[#0a0a0f]"
       aria-hidden
     >
-      {/* Layer 1 – tiny, 2% mouse + subtle drift */}
+      {/* Layer 1 – subtle drift + per-star cursor reaction */}
       <div className="star-drift-subtle-1 absolute inset-0">
-        <div style={{ willChange: "transform", transform: transform.layer1 }} className="absolute inset-0">
-          {layer1.map((s, i) => renderStar(s, i))}
-        </div>
+        {layer1.map((s, i) => renderStar(s, i, layer1Ref))}
       </div>
-      {/* Layer 2 – small, 5% mouse + subtle drift */}
+      {/* Layer 2 */}
       <div className="star-drift-subtle-2 absolute inset-0">
-        <div style={{ willChange: "transform", transform: transform.layer2 }} className="absolute inset-0">
-          {layer2.map((s, i) => renderStar(s, i))}
-        </div>
+        {layer2.map((s, i) => renderStar(s, i, layer2Ref))}
       </div>
-      {/* Layer 3 – medium, 8% mouse + subtle drift */}
+      {/* Layer 3 */}
       <div className="star-drift-subtle-3 absolute inset-0">
-        <div style={{ willChange: "transform", transform: transform.layer3 }} className="absolute inset-0">
-          {layer3.map((s, i) => renderStar(s, i))}
-        </div>
+        {layer3.map((s, i) => renderStar(s, i, layer3Ref))}
       </div>
 
-      {/* Dark mode: same subtle stars, slightly more visible on dark bg */}
+      {/* Dark mode: extra subtle stars (no mouse reaction for simplicity) */}
       <div className="dark:block hidden absolute inset-0" aria-hidden>
         <div className="star-drift-subtle-4 absolute inset-0">
-          <div style={{ willChange: "transform", transform: transform.layer3 }} className="absolute inset-0">
           {layer3.length > 0 &&
             layer3.slice(0, 6).map((s, i) => (
               <span
@@ -216,7 +220,6 @@ export default function BackgroundPattern() {
                 aria-hidden
               />
             ))}
-          </div>
         </div>
       </div>
 
