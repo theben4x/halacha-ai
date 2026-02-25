@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import Hero from "./components/Hero";
 import ChatArea from "./components/ChatArea";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
 import BackgroundPattern from "./components/BackgroundPattern";
 import { ThemeProvider } from "./components/ThemeProvider";
 
@@ -35,7 +34,6 @@ export default function Home() {
             <ChatArea onHasContentChange={setHasContent} resetViewTrigger={resetViewTrigger} />
           </div>
         </div>
-        <Footer />
       </div>
     </ThemeProvider>
   );

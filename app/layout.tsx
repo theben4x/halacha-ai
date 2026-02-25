@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Noto_Sans_Hebrew, Roboto } from "next/font/google";
 import "./globals.css";
+import Footer from "./components/Footer";
 
 const notoSansHebrew = Noto_Sans_Hebrew({
   variable: "--font-noto-sans-hebrew",
@@ -37,6 +38,7 @@ export default function RootLayout({
         style={{ fontFamily: "var(--font-noto-sans-hebrew), 'Noto Sans Hebrew', system-ui, sans-serif" }}
       >
         {children}
+        <Footer />
       </body>
     </html>
   );

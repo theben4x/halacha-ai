@@ -2,9 +2,19 @@
 
 export default function Footer() {
   return (
-    <footer className="shrink-0 border-t border-gray-200/60 bg-gray-100/85 px-4 py-4 dark:border-gray-700/50 dark:bg-[#0a0a0f]/90">
+    <footer
+      style={{
+        position: "fixed",
+        bottom: 0,
+        width: "100%",
+        zIndex: 50,
+        padding: "10px",
+        background: "rgba(0,0,0,0.5)",
+        textAlign: "center",
+      }}
+    >
       <p
-        className="mx-auto max-w-2xl text-center text-xs text-gray-600 dark:text-gray-400"
+        className="mx-auto max-w-2xl text-xs text-white"
         dir="rtl"
         lang="he"
       >
