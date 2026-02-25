@@ -24,8 +24,10 @@ export const metadata: Metadata = {
   title: "Halacha.ai - Accurate Answers from Original Sources",
   description: "Ask Halachic questions and receive answers grounded in Shulchan Aruch, Mishnah Berurah, and authoritative texts.",
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon-32x32.png",
+    apple: "/apple-touch-icon.png",
   },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
