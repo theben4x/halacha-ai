@@ -199,10 +199,10 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
                   className={`flex w-full ${msg.role === "user" ? "justify-start" : "justify-end"}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
+                    className={`max-w-[85%] rounded-2xl text-[15px] leading-relaxed ${
                       msg.role === "user"
-                        ? "bg-[var(--halacha-gold)]/15 text-[var(--foreground)] dark:bg-[var(--halacha-gold)]/20 dark:text-white"
-                        : "bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-100"
+                        ? "bg-[var(--halacha-gold)]/15 px-4 py-3 text-[var(--foreground)] dark:bg-[var(--halacha-gold)]/20 dark:text-white"
+                        : "border border-[#FFD700]/25 bg-[#FFFFFF] p-5 text-gray-900 shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:border-gray-600 dark:bg-[#1e293b] dark:text-gray-100 dark:shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
                     }`}
                     dir={msg.role === "user" ? "rtl" : "auto"}
                   >
