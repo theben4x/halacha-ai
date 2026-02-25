@@ -181,9 +181,57 @@ export default function BackgroundPattern() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-[1] overflow-hidden bg-[#fffdf7] dark:bg-[#0a0a0f]"
+      className="pointer-events-none fixed inset-0 z-[1] overflow-hidden bg-[#FFFFFF] dark:bg-[#0a0a0f]"
       aria-hidden
     >
+      {/* Mesh gradient: soft blurry orbs (light mode only) – Pure White + Ghost White */}
+      <div className="absolute inset-0 dark:opacity-0" aria-hidden>
+        <div
+          className="absolute rounded-full opacity-70"
+          style={{
+            width: "85vmax",
+            height: "85vmax",
+            left: "-20%",
+            top: "-15%",
+            background: "#F8F8FF",
+            filter: "blur(100px)",
+          }}
+        />
+        <div
+          className="absolute rounded-full opacity-60"
+          style={{
+            width: "75vmax",
+            height: "75vmax",
+            right: "-25%",
+            bottom: "-10%",
+            background: "#F8F8FF",
+            filter: "blur(90px)",
+          }}
+        />
+        <div
+          className="absolute rounded-full opacity-50"
+          style={{
+            width: "60vmax",
+            height: "60vmax",
+            left: "30%",
+            bottom: "-20%",
+            background: "#F8F8FF",
+            filter: "blur(80px)",
+          }}
+        />
+        <div
+          className="absolute rounded-full opacity-55"
+          style={{
+            width: "55vmax",
+            height: "55vmax",
+            right: "10%",
+            top: "-15%",
+            background: "#F8F8FF",
+            filter: "blur(85px)",
+          }}
+        />
+      </div>
+
       {/* Layer 1 – subtle drift + per-star cursor reaction */}
       <div className="star-drift-subtle-1 absolute inset-0">
         {layer1.map((s, i) => renderStar(s, i, layer1Ref))}
