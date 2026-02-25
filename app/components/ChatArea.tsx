@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Loader2, Send, Trash2 } from "lucide-react";
+import { Copy, ExternalLink, Loader2, Mic, MicOff, Send, Share2, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getHalachicAnswer, type HalachaSource } from "../actions/halacha";
 
@@ -51,6 +51,19 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
   const [hydrated, setHydrated] = useState(false);
   const skipSaveRef = useRef(false);
   const [placeholder, setPlaceholder] = useState(PLACEHOLDER_SHORT);
+  const [isListening, setIsListening] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState<number | null>(null);
+  const [hasSpeechRecognition, setHasSpeechRecognition] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const API =
+        (window as unknown as { SpeechRecognition?: unknown }).SpeechRecognition ||
+        (window as unknown as { webkitSpeechRecognition?: unknown }).webkitSpeechRecognition;
+      setHasSpeechRecognition(!!API);
+    }
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 640px)");
@@ -118,6 +131,60 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
     onHasContentChange?.(false);
   }, [onHasContentChange]);
 
+  const toggleMic = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const SpeechRecognitionAPI =
+      (window as unknown as { SpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) {
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognitionAPI();
+    recognition.lang = "he-IL";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let final = "";
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+      setInput((prev) => {
+        const base = prev.trimEnd();
+        if (final) return base ? `${base} ${final}` : final;
+        if (interim) return base ? `${base} ${interim}` : interim;
+        return prev;
+      });
+    };
+
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  }, [isListening]);
+
+  const handleCopy = useCallback((text: string, messageIndex: number) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopyFeedback(messageIndex);
+      setTimeout(() => setCopyFeedback((prev) => (prev === messageIndex ? null : prev)), 2000);
+    });
+  }, []);
+
   return (
     <main className="flex w-full max-w-4xl flex-1 min-h-0 flex-col bg-transparent transition-[flex] duration-300 ease-out">
       {hasContent && (
@@ -181,6 +248,33 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
                             </ul>
                           </div>
                         )}
+                        {msg.role === "assistant" && "content" in msg && (
+                          <div className="mt-3 flex flex-wrap gap-2 border-t border-gray-200 dark:border-gray-600 pt-3">
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(msg.content, i)}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--halacha-gold)]/40 bg-transparent px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-[var(--halacha-gold)]/10 dark:text-gray-300 dark:hover:bg-[var(--halacha-gold)]/15"
+                              aria-label="Copy"
+                            >
+                              <Copy className="h-3.5 w-3.5" aria-hidden />
+                              {copyFeedback === i ? (
+                                <span className="text-[var(--halacha-gold)]" dir="rtl">הועתק</span>
+                              ) : (
+                                <span dir="rtl">העתק</span>
+                              )}
+                            </button>
+                            <a
+                              href={`https://wa.me/?text=${encodeURIComponent(msg.content)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--halacha-gold)]/40 bg-transparent px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-[var(--halacha-gold)]/10 dark:text-gray-300 dark:hover:bg-[var(--halacha-gold)]/15"
+                              aria-label="Share to WhatsApp"
+                            >
+                              <Share2 className="h-3.5 w-3.5" aria-hidden />
+                              <span dir="rtl">שתף לוואטסאפ</span>
+                            </a>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
@@ -216,6 +310,25 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
             style={{ fontSize: "16px" }}
             aria-label="Question input"
           />
+          {hasSpeechRecognition && (
+            <button
+              type="button"
+              onClick={toggleMic}
+              disabled={loading}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--halacha-gold)] focus:ring-offset-2 focus:ring-offset-[var(--background)] disabled:opacity-50 ${
+                isListening
+                  ? "bg-red-500/20 text-red-600 dark:text-red-400"
+                  : "text-gray-500 hover:bg-gray-100 hover:text-[var(--halacha-gold)] dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-[var(--halacha-gold)]"
+              }`}
+              aria-label={isListening ? "Stop listening" : "Voice input"}
+            >
+              {isListening ? (
+                <MicOff className="h-5 w-5" aria-hidden />
+              ) : (
+                <Mic className="h-5 w-5" aria-hidden />
+              )}
+            </button>
+          )}
           <button
             type="submit"
             disabled={loading || !input.trim()}
