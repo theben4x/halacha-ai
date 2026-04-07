@@ -55,6 +55,7 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
   const [copyFeedback, setCopyFeedback] = useState<number | null>(null);
   const [hasSpeechRecognition, setHasSpeechRecognition] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -100,6 +101,19 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
     onHasContentChange?.(hasContent);
   }, [hasContent, onHasContentChange]);
 
+  const resizeTextarea = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    const lineHeight = 24;
+    const maxHeight = lineHeight * 5;
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+  }, []);
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [input, resizeTextarea]);
+
   const handleSearch = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -107,6 +121,11 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
       if (!trimmed || loading) return;
 
       setInput("");
+      requestAnimationFrame(() => {
+        if (textareaRef.current) {
+          textareaRef.current.style.height = "auto";
+        }
+      });
       setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
       setLoading(true);
 
@@ -172,6 +191,17 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
       setTimeout(() => setCopyFeedback((prev) => (prev === messageIndex ? null : prev)), 2000);
     });
   }, []);
+
+  const handleTextareaKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key !== "Enter") return;
+      if (e.shiftKey) return;
+      e.preventDefault();
+      if (loading) return;
+      e.currentTarget.form?.requestSubmit();
+    },
+    [loading]
+  );
 
   return (
     <main className="flex w-full max-w-4xl flex-1 min-h-0 flex-col bg-transparent transition-[flex] duration-300 ease-out">
@@ -289,17 +319,18 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
         <form
           dir="rtl"
           onSubmit={handleSearch}
-          className="flex w-full max-w-2xl items-center gap-2 rounded-full border border-[var(--halacha-gold)]/20 bg-[var(--background)] py-1 pr-1.5 pl-2 shadow-sm transition-all duration-200 focus-within:border-[var(--halacha-gold)]/40 focus-within:ring-1 focus-within:ring-[var(--halacha-gold)]/30 dark:border-[var(--halacha-gold)]/15 dark:bg-slate-900 dark:focus-within:border-[var(--halacha-gold)]/35 dark:focus-within:ring-[var(--halacha-gold)]/25"
+          className="flex w-full max-w-2xl items-end gap-2 rounded-2xl border border-[var(--halacha-gold)]/20 bg-[var(--background)] py-1 pr-1.5 pl-2 shadow-sm transition-all duration-200 focus-within:border-[var(--halacha-gold)]/40 focus-within:ring-1 focus-within:ring-[var(--halacha-gold)]/30 dark:border-[var(--halacha-gold)]/15 dark:bg-slate-900 dark:focus-within:border-[var(--halacha-gold)]/35 dark:focus-within:ring-[var(--halacha-gold)]/25"
         >
-          <input
-            type="text"
+          <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleTextareaKeyDown}
             placeholder={placeholder}
+            rows={1}
             dir="rtl"
-            disabled={loading}
-            className="min-h-[44px] min-w-0 flex-1 rounded-full border-0 bg-transparent px-5 py-2.5 text-[var(--foreground)] placeholder:text-gray-400 focus:outline-none focus:ring-0 disabled:opacity-70 dark:bg-transparent dark:text-white dark:placeholder:text-gray-500"
-            style={{ fontSize: "16px" }}
+            className="min-h-[44px] max-h-[120px] min-w-0 flex-1 resize-none overflow-y-auto rounded-2xl border-0 bg-transparent px-5 py-2.5 text-[var(--foreground)] placeholder:text-gray-400 focus:outline-none focus:ring-0 dark:bg-transparent dark:text-white dark:placeholder:text-gray-500"
+            style={{ fontSize: "16px", lineHeight: "24px" }}
             aria-label="Question input"
           />
           {hasSpeechRecognition && (
@@ -324,10 +355,14 @@ export default function ChatArea({ onHasContentChange, resetViewTrigger = 0 }: P
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--halacha-gold)] text-[var(--halacha-navy)] transition-colors hover:bg-[var(--halacha-gold-light)] focus:outline-none focus:ring-2 focus:ring-[var(--halacha-gold)] focus:ring-offset-2 focus:ring-offset-[var(--background)] disabled:opacity-60 dark:focus:ring-offset-slate-900"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--halacha-gold)] text-[var(--halacha-navy)] transition-colors hover:bg-[var(--halacha-gold-light)] focus:outline-none focus:ring-2 focus:ring-[var(--halacha-gold)] focus:ring-offset-2 focus:ring-offset-[var(--background)] disabled:cursor-not-allowed disabled:opacity-60 dark:focus:ring-offset-slate-900"
             aria-label="Send"
           >
-            <Send className="h-4 w-4" aria-hidden />
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Send className="h-4 w-4" aria-hidden />
+            )}
           </button>
         </form>
       </div>
